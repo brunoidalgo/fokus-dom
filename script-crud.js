@@ -4,8 +4,16 @@ const textArea = document.querySelector('.app__form-textarea');
 
 const taskList = document.querySelector('.app__section-task-list');
 
+const descParagraph = document.querySelector('.app__section-active-task-description');
+
 // Lista de Tarefas
 const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+let taskSelect = null;
+
+function attTask() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
 function addTask(task) {
     const li = document.createElement('li');
@@ -26,6 +34,21 @@ function addTask(task) {
     const btn = document.createElement('button');
     const imgBtn = document.createElement('img');
 
+
+    btn.onclick = () => {
+        // debugger
+        const newDes = prompt("Qual o nome da tarefa ?");
+        // console.log(`Valor: ` + newDes);
+        if(newDes) {
+            paragraph.textContent = newDes;
+            task.description = newDes;
+            attTask();
+        }
+        else {
+            alert('Valor digitado é inválido.')
+        }
+    };
+
     imgBtn.setAttribute('src','/imagens/edit.png');
     btn.classList.add('app_button-edit');
     btn.append(imgBtn);
@@ -34,6 +57,21 @@ function addTask(task) {
     li.append(svg);
     li.append(paragraph);
     li.append(btn);
+
+    li.onclick = () => {
+        if(taskSelect == task) {
+            descParagraph.textContent = '';
+            taskSelect = null;
+        }
+        taskSelect = task;
+        descParagraph.textContent = task.description;
+        document.querySelectorAll('.app__section-task-list-item-active')
+        .forEach((el) => {
+            el.classList.remove('app__section-task-list-item-active')
+        });
+
+        li.classList.add('app__section-task-list-item-active');
+    }
 
     return li;
 };
@@ -50,7 +88,7 @@ formAddTask.addEventListener('submit', (event) => {
     tasks.push(task);
     const elementTask = addTask(task);
     taskList.append(elementTask);
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    attTask();
     textArea.value = '';
     formAddTask.classList.add('hidden');
 });
