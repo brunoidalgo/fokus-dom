@@ -6,10 +6,14 @@ const taskList = document.querySelector('.app__section-task-list');
 
 const descParagraph = document.querySelector('.app__section-active-task-description');
 
+const btnRemove = document.querySelector('#btn-remover-concluidas');
+const btnRemoveAll = document.querySelector('#btn-remover-todas');
+
 // Lista de Tarefas
-const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
 let taskSelect = null;
+let liTaskSelect = null;
 
 function attTask() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -58,21 +62,28 @@ function addTask(task) {
     li.append(paragraph);
     li.append(btn);
 
-    li.onclick = () => {
-        if(taskSelect == task) {
-            descParagraph.textContent = '';
-            taskSelect = null;
+    if (task.complet) {
+        li.classList.add('app__section-task-list-item-complete');
+        btn.setAttribute('disabled', 'desabled');
+    } else {
+        li.onclick = () => {
+            document.querySelectorAll('.app__section-task-list-item-active')
+            .forEach((el) => {
+                el.classList.remove('app__section-task-list-item-active')
+            });
+            if(taskSelect == task) {
+                descParagraph.textContent = '';
+                taskSelect = null;
+                liTaskSelect = null;
+                return
+            }
+            taskSelect = task;
+            liTaskSelect = li;
+            descParagraph.textContent = task.description;
+            li.classList.add('app__section-task-list-item-active');
         }
-        taskSelect = task;
-        descParagraph.textContent = task.description;
-        document.querySelectorAll('.app__section-task-list-item-active')
-        .forEach((el) => {
-            el.classList.remove('app__section-task-list-item-active')
-        });
-
-        li.classList.add('app__section-task-list-item-active');
     }
-
+    
     return li;
 };
 
@@ -98,3 +109,26 @@ tasks.forEach(task => {
     const elementTask = addTask(task);
     taskList.append(elementTask);
 });
+
+document.addEventListener('FocoFinalizado', () => {
+    if (taskSelect && liTaskSelect) {
+        liTaskSelect.classList.remove('app__section-task-list-item-active');
+        liTaskSelect.classList.add('app__section-task-list-item-complete');
+        liTaskSelect.querySelector('button').setAttribute('disabled', 'desabled');
+        taskSelect.complet = true;
+        attTask()
+    }
+})
+
+const removeTasks = (onlyComplets) => {
+    const seletctor = onlyComplets ? '.app__section-task-list-item-complete' :
+    '.app__section-task-list-item' ;
+    document.querySelectorAll(seletctor).forEach(element => {
+        element.remove()
+    });
+    tasks = onlyComplets ? tasks.filter(task => !task.complet) : [];
+    attTask();
+};
+
+btnRemove.onclick = () => removeTasks(true);
+btnRemoveAll.onclick = () => removeTasks(false);

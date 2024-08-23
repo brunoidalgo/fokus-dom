@@ -25,7 +25,7 @@ const imgPause = document.querySelector('#start-pause img');
 
 const tempoNaTela = document.querySelector('#timer');
 
-let tempoDecorridoSeg = 1500;
+let tempoDecorridoSeg = 0;
 let intervaloId = 1;
 
 function alterarContexto(contexto) {
@@ -89,6 +89,11 @@ const contagemRegressiva = () => {
     if(tempoDecorridoSeg <= 0) {
         beep.play(); // Tempo Finalizado
         alert('Tempo Finalizado');
+        const focoAtivo = html.getAttribute('data-contexto') === 'foco';
+        if(focoAtivo) {
+            const event = new CustomEvent('FocoFinalizado');
+            document.dispatchEvent(event);
+        }
         zerar();
         return
     }
